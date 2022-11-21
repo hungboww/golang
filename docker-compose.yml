@@ -1,0 +1,59 @@
+version: "3.9"
+services:
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: dev
+    volumes:
+      - .:/opt/app/api
+    environment:
+      API_SERVER_ADDR: ":3000"
+    ports:
+      - "3000:3000"
+
+  redis:
+    image: redis:5
+    ports:
+      - 6379:6379
+  postgres:
+    image: postgres:11
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres-db/pgdata/pgdata
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      PGDATA: /pgdata
+    healthcheck:
+      test: pg_isready -U root -d postgres
+      interval: 10s
+      timeout: 3s
+      retries: 5
+#  migrate:
+#    image: migrate/migrate
+#    networks:
+#      - go_tutorial
+#    volumes:
+#      - .:/migrations
+#    command: [ "-path", "/migrations", "-database",  "postgresql://172.24.0.3:5432/postgres?sslmode=disable", "up", "3" ]
+#    links:
+#      - postgres
+#    depends_on:
+#      - postgres
+#  migrate:
+#    image: migrate/migrate
+#
+#    depends_on:
+#      - postgres
+#
+#
+#    command:
+#      [ "-path", "migrations", "-database",  "jdbc:postgresql://172.24.0.4:5432/postgres?sslmode=disable", "up" ]
+
+networks:
+  default:
+    external:
+      name: go_tutorial

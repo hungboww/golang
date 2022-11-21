@@ -1,0 +1,3 @@
+user_id,first_name,last_name,email,password,role,about,avatar,phone_number,address,city,country, gender, postcode, birthday, created_at, updated_at,
+1,'hungnt2','the','hungnt2@gmail.com','123456','admin','hung the nguyen python - golang developers','',0965399614,'Ha Noi','Ha Noi','Tan Hoi','male','10000','1999-9-10','2022-01-01T00:00:00','2022-01-01T00:00:00',
+2,'thanhnc2','cong thanh','thanhnc2@gmail.com','123456','user','thanh cong nguyen python - golang developers','',0965399678,'Ha Noi','Ha Noi','Ninh Binh','male','10000','1999-9-10','2022-03-01T00:00:00','2022-03-01T00:00:00',
