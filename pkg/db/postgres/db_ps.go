@@ -6,17 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
 const (
-	host     = "172.31.0.2"
+	host     = "172.31.0.3"
 	port     = "5432"
 	user     = "root"
 	password = "root"
 	dbname   = "postgres"
 )
 
-func Connection() {
+func Connection() *gorm.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
@@ -33,5 +31,13 @@ func Connection() {
 	}()
 
 	fmt.Println("ConnectDatabase success!")
-	DB = db
+	return db
+}
+
+func CloseDatabaseConnection(db *gorm.DB) {
+	dbSQL, err := db.DB()
+	if err != nil {
+		panic("Failed to close connection from database")
+	}
+	dbSQL.Close()
 }

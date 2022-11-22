@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS CITEXT;
 
 CREATE TABLE users
 (
-    user_id      INTEGER PRIMARY KEY ,
+    id      INTEGER  PRIMARY KEY ,
     first_name   VARCHAR(32)                 NOT NULL CHECK ( first_name <> '' ),
     last_name    VARCHAR(32)                 NOT NULL CHECK ( last_name <> '' ),
     email        VARCHAR(64) UNIQUE          NOT NULL CHECK ( email <> '' ),
