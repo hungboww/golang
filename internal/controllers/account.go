@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"main.go/dto"
+	"main.go/models"
 	"main.go/pkg/helper"
 	"main.go/service"
 	"net/http"
@@ -11,16 +12,21 @@ import (
 
 type AuThenController interface {
 	RegisterAccount(ctx *gin.Context)
-}
-type userController struct {
-	userService service.AuthService
+	Login(ctx *gin.Context)
 }
 
-func NewAuthController(authService service.AuthService) AuThenController {
+type userController struct {
+	userService service.AuthService
+	jwtService  service.JWTService
+}
+
+func NewAuthController(authService service.AuthService, jwtService service.JWTService) AuThenController {
 	return &userController{
 		userService: authService,
+		jwtService:  jwtService,
 	}
 }
+
 func (c *userController) RegisterAccount(ctx *gin.Context) {
 	fmt.Println("RegisterAccount", *c)
 	var registerBody dto.UserCreate
@@ -31,8 +37,9 @@ func (c *userController) RegisterAccount(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("registerBody", registerBody)
+	fmt.Println("registerBody", registerBody.Email)
 	if !c.userService.IsDuplicateEmail(registerBody.Email) {
+		fmt.Errorf("Email %s already exists", registerBody.Email)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Email is duplicate",
 		})
@@ -44,6 +51,29 @@ func (c *userController) RegisterAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, res)
 	}
 
+}
+func (c *userController) Login(ctx *gin.Context) {
+	var loginOTD dto.Login
+	err := ctx.ShouldBind(&loginOTD)
+	if err != nil {
+		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	authJWT := c.userService.VerifyTokenUser(loginOTD.Email, loginOTD.Password)
+	if v, ok := authJWT.(models.User); ok {
+		generatedToken := c.jwtService.GenerateToken(string(rune(v.Id)))
+		ctx.SetCookie("Authorization", generatedToken, 3600*24*30, "", "", false, true)
+
+		ctx.SetSameSite(http.SameSiteLaxMode)
+
+		//res := helper.BuildResponse(true, "Ok", nil, res)
+		res := helper.BuildResponse(true, generatedToken, nil, v)
+		ctx.JSON(http.StatusOK, res)
+		return
+	}
+	res := helper.BuildErrorResponse("Please check again your credential", "Invalid credential", helper.EmptyObj{})
+	ctx.AbortWithStatusJSON(http.StatusUnauthorized, res)
 }
 
 //func RegisterUser(c *gin.Context) {

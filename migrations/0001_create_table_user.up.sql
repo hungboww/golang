@@ -1,6 +1,5 @@
 DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS news CASCADE;
-
+create sequence tbl_user_seq;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS CITEXT;
 -- CREATE EXTENSION IF NOT EXISTS postgis;
@@ -9,10 +8,10 @@ CREATE EXTENSION IF NOT EXISTS CITEXT;
 
 CREATE TABLE users
 (
-    id      INTEGER  PRIMARY KEY ,
+    id           bigint DEFAULT nextval ('tbl_user_seq')
+        primary key,
     first_name   VARCHAR(32)                 NOT NULL CHECK ( first_name <> '' ),
-    last_name    VARCHAR(32)                 NOT NULL CHECK ( last_name <> '' ),
-    email        VARCHAR(64) UNIQUE          NOT NULL CHECK ( email <> '' ),
+        email        VARCHAR(64) UNIQUE          NOT NULL CHECK ( email <> '' ),
     password     VARCHAR(250)                NOT NULL CHECK ( octet_length(password) <> 0 ),
     role         VARCHAR(10)                 NOT NULL DEFAULT 'user',
     about        VARCHAR(1024)                        DEFAULT '',

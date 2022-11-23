@@ -4,10 +4,91 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
+	"main.go/dto"
 	"main.go/models"
+	"main.go/pkg/helper"
+	"main.go/service"
 	"net/http"
+	"strconv"
 )
 
+type UserController interface {
+	AllUserControllers(ctx *gin.Context)
+	DetailUserControllers(ctx *gin.Context)
+	DeleteUser(ctx *gin.Context)
+	UpdateUser(ctx *gin.Context)
+}
+type userControllers struct {
+	userService service.UserService
+	jwtService  service.JWTService
+}
+
+func NewAccountController(userService service.UserService, jwtService service.JWTService) UserController {
+	return &userControllers{
+		userService: userService,
+		jwtService:  jwtService,
+	}
+}
+func (c *userControllers) AllUserControllers(ctx *gin.Context) {
+	var account []models.User = c.userService.AllUser()
+	res := helper.BuildResponse(true, "Ok", nil, account)
+	ctx.JSON(http.StatusOK, res)
+}
+func (c *userControllers) DetailUserControllers(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	var account models.User = c.userService.GetUserById(id)
+	if (account == models.User{}) {
+		res := helper.BuildErrorResponse("No account was found", "No account was found", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, res)
+		return
+	} else {
+		res := helper.BuildResponse(true, "Ok", nil, account)
+		ctx.JSON(http.StatusOK, res)
+	}
+
+}
+func (c *userControllers) DeleteUser(ctx *gin.Context) {
+	var account models.User
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	account = c.userService.GetUserById(id)
+	if account.Id == id {
+		c.userService.DeleteUser(account)
+		res := helper.BuildResponse(true, "Delete success!@", nil, helper.EmptyObj{})
+		ctx.JSON(http.StatusOK, res)
+	} else {
+		res := helper.BuildErrorResponse("No account was found", "No account was found", helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, res)
+		return
+	}
+
+}
+func (c *userControllers) UpdateUser(ctx *gin.Context) {
+	var userUpdate dto.UserUpdate
+	err := ctx.ShouldBind(&userUpdate)
+	fmt.Println("errerrerr", err)
+
+	if err != nil {
+		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+	authHeader := ctx.GetHeader("Authorization")
+	fmt.Println("authHeader", authHeader)
+	result := c.userService.UpdateUser(userUpdate)
+	response := helper.BuildResponse(true, "OK", nil, result)
+	ctx.JSON(http.StatusOK, response)
+
+}
 func GetInfoUser(c *gin.Context) {
 	user, exists := c.Get("user")
 

@@ -13,10 +13,13 @@ import (
 )
 
 var (
-	db             *gorm.DB                     = postgres.Connection()
-	userRepository repository.UserRepository    = repository.NewUserRepository(db)
-	authService    service.AuthService          = service.NewAuthService(userRepository)
-	authController controllers.AuThenController = controllers.NewAuthController(authService)
+	db                *gorm.DB                     = postgres.Connection()
+	userRepository    repository.UserRepository    = repository.NewUserRepository(db)
+	authService       service.AuthService          = service.NewAuthService(userRepository)
+	authController    controllers.AuThenController = controllers.NewAuthController(authService, jwtService)
+	jwtService        service.JWTService           = service.NewJWTService()
+	accountService    service.UserService          = service.NewUserService(userRepository)
+	accountController controllers.UserController   = controllers.NewAccountController(accountService, jwtService)
 )
 
 //	func init() {
@@ -28,16 +31,18 @@ func main() {
 	r := gin.Default()
 	rows2 := CSV.ReadFile("account.csv")
 	CSV.InsertDataAccount(rows2)
-	authRoutes := r.Group("api/user")
+	authRoutes := r.Group("api/account")
 	{
 		authRoutes.POST("/signup", authController.RegisterAccount)
-		//authRoutes.POST("/login", controllers.LoginAccount)
+		authRoutes.POST("/login", authController.Login)
 	}
-	userRoutes := r.Group("api/user", midlleware.RequireAuth)
+	userRoutes := r.Group("api/user", midlleware.AuthorizeJWT(jwtService))
 	{
-		userRoutes.GET("/profile", controllers.GetInfoUser)
-		userRoutes.GET("/list", controllers.ListUser)
-		userRoutes.GET("/:id", controllers.DetailUser)
+		userRoutes.GET("/all", accountController.AllUserControllers)
+		userRoutes.GET("/profile/:id", accountController.DetailUserControllers)
+		userRoutes.DELETE("/profile/:id", accountController.DeleteUser)
+		userRoutes.PATCH("/profile/:id", accountController.UpdateUser)
+
 		//userRoutes.PATCH("/profile", controllers.UpdateInfo)
 		//userRoutes.DELETE("profile/:id", controllers.DeletePerson)
 

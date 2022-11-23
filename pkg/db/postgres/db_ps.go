@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	host     = "172.31.0.3"
+	host     = "172.31.0.4"
 	port     = "5432"
 	user     = "root"
 	password = "root"

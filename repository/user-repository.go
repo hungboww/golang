@@ -17,6 +17,8 @@ type UserRepository interface {
 	UpdateUser(user models.User) models.User
 	DeleteUser(b models.User)
 	FindUserByID(userID uint64) models.User
+	VerifyUser(email string, password string) interface{}
+	InfoUsers() []models.User
 }
 
 type userConnection struct {
@@ -30,13 +32,22 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (db *userConnection) InsertUser(user models.User) models.User {
-	fmt.Println("user:1", user)
-
 	user.Password = hashAndSalt([]byte(user.Password))
-	fmt.Println("aaaaaaaaaaaaaaaaaaaaaa", user.Email)
-	db.connection.Save(&user)
+	user.Role = "user"
+	fmt.Println("User Connection: ", user)
+	db.connection.Create(&user)
 	return user
 }
+
+func (db *userConnection) VerifyUser(email string, password string) interface{} {
+	var user models.User
+	res := db.connection.Where("email = ?", email).Take(&user)
+	if res.Error == nil {
+		return user
+	}
+	return nil
+}
+
 func (db *userConnection) UpdateUser(user models.User) models.User {
 	if user.Password != "" {
 		user.Password = hashAndSalt([]byte(user.Password))
@@ -88,4 +99,10 @@ func hashAndSalt(pwd []byte) string {
 		panic("Failed to hash password")
 	}
 	return string(hash)
+}
+func (db *userConnection) InfoUsers() []models.User {
+
+	var users []models.User
+	db.connection.Find(&users)
+	return users
 }
