@@ -75,5 +75,5 @@ func (csv *accountCSVData) InsertDataAccount(rows [][]string) {
 	if err != nil {
 		fmt.Println("Can't insert CSV file into database. Please try again!!!", err)
 	}
-	fmt.Println("成功した挿入")
+
 }

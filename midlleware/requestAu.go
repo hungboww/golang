@@ -53,10 +53,8 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 		jwtString := strings.Split(authHeader, "Bearer ")[1]
 
 		token, err := jwtService.ValidateToken(jwtString)
-		fmt.Println("token", token)
 		if token.Valid {
 			claims := token.Claims.(jwt.MapClaims)
-			fmt.Println("claims", claims)
 			log.Println("Claim[id]: ", claims["id"])
 			ctx.Next()
 		} else {

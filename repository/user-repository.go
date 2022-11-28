@@ -3,7 +3,6 @@ package repository
 import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"log"
 	"main.go/models"
 )
 
@@ -92,7 +91,6 @@ func (db *userConnection) AllUser() []models.User {
 func hashAndSalt(pwd []byte) string {
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.DefaultCost)
 	if err != nil {
-		log.Println(err)
 		panic("Failed to hash password")
 	}
 	return string(hash)

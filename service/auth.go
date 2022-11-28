@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/mashingan/smapping"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -36,7 +35,6 @@ func (service *authService) CreateUser(user dto.UserCreate) models.User {
 	return res
 }
 func (service *authService) IsDuplicateEmail(email string) bool {
-	fmt.Println("email user :", email)
 	res := service.userRepository.IsDuplicateEmail(email)
 	return !(res.Error == nil)
 }
@@ -57,7 +55,6 @@ func comparePassword(hashedPwd string, plainPassword []byte) bool {
 	byteHash := []byte(hashedPwd)
 	err := bcrypt.CompareHashAndPassword(byteHash, plainPassword)
 	if err != nil {
-		log.Println(err)
 		return false
 	}
 	return true

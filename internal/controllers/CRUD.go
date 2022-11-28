@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	"main.go/dto"
 	"main.go/models"
 	"main.go/pkg/helper"
@@ -75,15 +73,13 @@ func (c *userControllers) DeleteUser(ctx *gin.Context) {
 func (c *userControllers) UpdateUser(ctx *gin.Context) {
 	var userUpdate dto.UserUpdate
 	err := ctx.ShouldBind(&userUpdate)
-	fmt.Println("errerrerr", err)
 
 	if err != nil {
 		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
-	authHeader := ctx.GetHeader("Authorization")
-	fmt.Println("authHeader", authHeader)
+	ctx.GetHeader("Authorization")
 	result := c.userService.UpdateUser(userUpdate)
 	response := helper.BuildResponse(true, "OK", nil, result)
 	ctx.JSON(http.StatusOK, response)
@@ -93,34 +89,33 @@ func GetInfoUser(c *gin.Context) {
 	user, exists := c.Get("user")
 
 	if !exists {
-		log.Printf("Unable to extract user from request context for unknown reason: %v\n", c)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "err",
 		})
 		return
 	}
 	uid := user.(models.User).Id
-	fmt.Printf("i' i` iiii", uid)
 	c.JSON(200, gin.H{
 		"code":   200,
 		"msg":    user,
 		"userID": uid,
 	})
 }
-func ListUser(c *gin.Context) {
-	//_, exists := c.Get("user")
-	//if !exists {
-	//	log.Printf("Unable to extract user from request context for unknown reason: %v\n", c)
-	//	c.JSON(http.StatusBadRequest, gin.H{
-	//		"error": "helpers.MiddlewareErr",
-	//	})
-	//	return
-	//}
-	//var accountUser []models.User
-	//postgres.DB.Find(&accountUser)
-	//c.JSON(http.StatusOK, &accountUser)
-}
-func DetailUser(c *gin.Context) {}
+
+//func ListUser(c *gin.Context) {
+//_, exists := c.Get("user")
+//if !exists {
+//	log.Printf("Unable to extract user from request context for unknown reason: %v\n", c)
+//	c.JSON(http.StatusBadRequest, gin.H{
+//		"error": "helpers.MiddlewareErr",
+//	})
+//	return
+//}
+//var accountUser []models.User
+//postgres.DB.Find(&accountUser)
+//c.JSON(http.StatusOK, &accountUser)
+//}
+//func DetailUser(c *gin.Context) {}
 
 //	_, exists := c.Get("user")
 //	id := c.Params.ByName("id")

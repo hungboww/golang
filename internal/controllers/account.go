@@ -37,7 +37,6 @@ func (c *userController) RegisterAccount(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("registerBody", registerBody.Email)
 	if !c.userService.IsDuplicateEmail(registerBody.Email) {
 		fmt.Errorf("Email %s already exists", registerBody.Email)
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -46,7 +45,6 @@ func (c *userController) RegisterAccount(ctx *gin.Context) {
 		return
 	} else {
 		createUser := c.userService.CreateUser(registerBody)
-		fmt.Println("createUser::::::::;;", createUser)
 		res := helper.BuildResponse(true, "Ok", nil, createUser)
 		ctx.JSON(http.StatusOK, res)
 	}
