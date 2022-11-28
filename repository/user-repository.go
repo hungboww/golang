@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"log"
@@ -34,7 +33,6 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 func (db *userConnection) InsertUser(user models.User) models.User {
 	user.Password = hashAndSalt([]byte(user.Password))
 	user.Role = "user"
-	fmt.Println("User Connection: ", user)
 	db.connection.Create(&user)
 	return user
 }
@@ -92,7 +90,6 @@ func (db *userConnection) AllUser() []models.User {
 }
 
 func hashAndSalt(pwd []byte) string {
-	fmt.Println("1234567654321")
 	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.DefaultCost)
 	if err != nil {
 		log.Println(err)

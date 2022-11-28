@@ -30,9 +30,11 @@ type userService struct {
 func (s *userService) AllUser() []models.User {
 	return s.userRepository.AllUser()
 }
+
 func (s *userService) GetUserById(id int) models.User {
 	return s.userRepository.FindUserByID(uint64(id))
 }
+
 func (s *userService) UpdateUser(user dto.UserUpdate) models.User {
 	userToUpdate := models.User{}
 	err := smapping.FillStruct(&userToUpdate, smapping.MapFields(&user))

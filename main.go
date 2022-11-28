@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"main.go/CSV"
@@ -14,6 +13,7 @@ import (
 
 var (
 	db                *gorm.DB                     = postgres.Connection()
+	csvData           CSV.AccountData              = CSV.NewAccountCSVData(db)
 	userRepository    repository.UserRepository    = repository.NewUserRepository(db)
 	authService       service.AuthService          = service.NewAuthService(userRepository)
 	authController    controllers.AuThenController = controllers.NewAuthController(authService, jwtService)
@@ -22,15 +22,11 @@ var (
 	accountController controllers.UserController   = controllers.NewAccountController(accountService, jwtService)
 )
 
-//	func init() {
-//		postgres.Connection()
-//	}
 func main() {
-	fmt.Println("Start", db)
 	defer postgres.CloseDatabaseConnection(db)
 	r := gin.Default()
 	rows2 := CSV.ReadFile("account.csv")
-	CSV.InsertDataAccount(rows2)
+	csvData.InsertDataAccount(rows2)
 	authRoutes := r.Group("api/account")
 	{
 		authRoutes.POST("/signup", authController.RegisterAccount)
@@ -42,10 +38,6 @@ func main() {
 		userRoutes.GET("/profile/:id", accountController.DetailUserControllers)
 		userRoutes.DELETE("/profile/:id", accountController.DeleteUser)
 		userRoutes.PATCH("/profile/:id", accountController.UpdateUser)
-
-		//userRoutes.PATCH("/profile", controllers.UpdateInfo)
-		//userRoutes.DELETE("profile/:id", controllers.DeletePerson)
-
 	}
 	err := r.Run(":3000")
 	if err != nil {

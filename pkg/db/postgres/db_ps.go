@@ -29,7 +29,6 @@ func Connection() *gorm.DB {
 			fmt.Println(r)
 		}
 	}()
-
 	fmt.Println("ConnectDatabase success!")
 	return db
 }
